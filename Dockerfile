@@ -3,10 +3,10 @@ FROM ubuntu
 MAINTAINER Daniel Thee Roperto <daniel@theeroperto.com>
 
 # Install dependencies
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update
-RUN apt-get -y install apache2
-RUN apt-get -y install git
-RUN apt-get -y install php libapache2-mod-php
+RUN apt-get -y install git apache2 php libapache2-mod-php mysql-server
+RUN apt-get -y install php-mysql php-xml php-curl php-zip php-gd php-mbstring php-xmlrpc php-soap php-intl
 
 # Copy files to container
 COPY moodle/. /var/www/moodle
@@ -15,6 +15,10 @@ COPY moodle/. /var/www/moodle
 RUN mv /var/www/moodle/moodle.conf /etc/apache2/sites-available/
 RUN chmod -R 2777 /var/www/moodle
 RUN a2ensite moodle
+RUN service mysql start \
+	&& sleep 5 \
+	&& echo CREATE DATABASE moodle\; | mysql \
+	&& php /var/www/moodle/html/admin/cli/install_database.php --adminpass=admin --adminemail=admin@moodle.docker.test --agree-license --fullname="Docker Moodle Site" --shortname="DockerMoodle"
 
 # Start services
-CMD /usr/sbin/apache2ctl -D FOREGROUND
+CMD service mysql restart && /usr/sbin/apache2ctl -D FOREGROUND

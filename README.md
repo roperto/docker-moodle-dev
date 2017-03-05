@@ -3,4 +3,6 @@
 This is a self-contained docker image with:
 
 * Apache
-* Moodle (no DB yet)
+* MySQL
+* Moodle
+
